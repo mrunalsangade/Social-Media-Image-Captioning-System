@@ -18,15 +18,6 @@ pipeline {
       }
     }
 
-    stage('Lint') {
-      steps {
-        // install flake8 if not already
-        bat 'python -m pip install flake8'
-        // run lint, but don’t fail the build on warnings
-        bat 'flake8 . --max-line-length=120 || echo Lint warnings only'
-      }
-    }
-
     stage('Build') {
       steps {
         // no compile/build step needed for this Python app
