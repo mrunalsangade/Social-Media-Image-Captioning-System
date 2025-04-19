@@ -40,6 +40,13 @@ pipeline {
       }
     }
 
+    stage('Docker Info') {
+      steps {
+        bat 'docker version'
+        bat 'docker info'
+      }
+    }
+
     stage('Docker Build & Push') {
       steps {
         withCredentials([usernamePassword(
