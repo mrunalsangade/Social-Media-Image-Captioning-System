@@ -6,7 +6,8 @@ pipeline {
       steps {
         // on Windows, use bat; adjust if you’re on Linux or macOS
         bat 'python -m pip install --upgrade pip'
-        bat 'pip install -r requirements.txt'
+        bat 'python -m pip install -r requirements.txt'
+
       }
     }
 
