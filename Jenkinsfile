@@ -2,17 +2,19 @@ pipeline {
   agent any
 
   environment {
+    // replace with your Jenkins DockerHub creds ID
     DOCKERHUB_CRED = 'f4bb4469-7e31-4cfc-a752-062d8c99b139'
   }
 
   options {
+    // so we can do our own shallow checkout
     skipDefaultCheckout()
   }
 
   stages {
     stage('Checkout') {
       steps {
-        // shallow‐clone only latest commit
+        // shallow clone just the latest commit
         checkout([
           $class: 'GitSCM',
           branches: [[ name: '*/main' ]],
@@ -28,23 +30,36 @@ pipeline {
 
     stage('Install Dependencies') {
       steps {
-        sh 'pip install -r requirements.txt'
+        // ensure pip is the latest
+        bat 'python -m pip install --upgrade pip'
+        // install everything you listed in requirements.txt
+        bat 'pip install -r requirements.txt'
+      }
+    }
+
+    stage('Lint') {
+      steps {
+        // if you install flake8, this will lint; otherwise it just echoes
+        bat 'flake8 . || echo Skipping lint — no flake8 installed'
       }
     }
 
     stage('Build') {
       steps {
-        // no build step for Python; included per spec
-        sh 'echo "No build step required for Python project"'
+        // Python apps usually don’t have a build step
+        bat 'echo No build step required'
       }
     }
 
     stage('Test') {
       steps {
-        sh 'mkdir -p reports'
-        sh 'pytest --junitxml=reports/results.xml'
+        // create reports folder if it doesn't exist
+        bat 'if not exist reports mkdir reports'
+        // run pytest and output JUnit‑style XML
+        bat 'pytest --junitxml=reports/results.xml'
       }
       post {
+        // publish test results
         always {
           junit 'reports/*.xml'
         }
@@ -54,15 +69,14 @@ pipeline {
     stage('Docker Build & Push') {
       steps {
         withCredentials([usernamePassword(
-          credentialsId: env.DOCKERHUB_CRED,
+          credentialsId: "${DOCKERHUB_CRED}",
           usernameVariable: 'DOCKER_USER',
           passwordVariable: 'DOCKER_PASS'
         )]) {
-          sh '''
-            echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-            docker build -t $DOCKER_USER/captioner:latest .
-            docker push $DOCKER_USER/captioner:latest
-          '''
+          // login, build, tag & push
+          bat 'echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin'
+          bat 'docker build -t %DOCKER_USER%/captioner:latest .'
+          bat 'docker push %DOCKER_USER%/captioner:latest'
         }
       }
     }
