@@ -33,13 +33,6 @@ pipeline {
       }
     }
 
-    stage('Lint') {
-      steps {
-        // remove this line or install flake8 if you don’t lint
-        sh 'flake8 . || echo "No lint configured"'
-      }
-    }
-
     stage('Build') {
       steps {
         // no build step for Python; included per spec
