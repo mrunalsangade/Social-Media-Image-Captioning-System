@@ -13,4 +13,4 @@ A Flaskâ€‘based service that generates captions for uploaded images using a preâ
 ## 3. Local Setup
 pip install -r requirements.txt
 flask run
-"CI pipeline test 19 april 2025" 
+#"CI pipeline test 19 april 2025" 
